@@ -1,0 +1,27 @@
+{
+  "name": "@oryn/ai",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./gemini": "./src/gemini.ts",
+    "./groq": "./src/groq.ts",
+    "./openai": "./src/openai.ts",
+    "./anthropic": "./src/anthropic.ts",
+    "./nlp": "./src/nlp/index.ts"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0",
+    "@oryn/database": "workspace:*",
+    "@oryn/types": "workspace:*",
+    "convex": "^1.17.0",
+    "groq-sdk": "^0.8.0",
+    "openai": "^4.77.3",
+    "@anthropic-ai/sdk": "^0.32.1"
+  },
+  "devDependencies": {
+    "typescript": "^5"
+  }
+}
