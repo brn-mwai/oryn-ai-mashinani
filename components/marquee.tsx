@@ -3,7 +3,7 @@
 export function Marquee() {
   const messages = [
     "AI-POWERED COLLECTION",
-    "INSTANT USDC SETTLEMENT",
+    "PAID WITHOUT THE AWKWARD CHASE",
     "AUTONOMOUS PAYMENT RECOVERY",
     "MULTI-CHANNEL OUTREACH",
     "SMART ESCALATION",
@@ -11,7 +11,6 @@ export function Marquee() {
     "YOU'RE OWED MONEY. ORYN COLLECTS IT.",
     "5% SUCCESS FEE",
     "NO UPFRONT COSTS",
-    "TRUSTED BY 500+ CREATORS",
   ]
 
   // Duplicate messages for seamless loop

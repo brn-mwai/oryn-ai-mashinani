@@ -11,12 +11,12 @@ export const orynContent = {
     _id: "oryn-hero",
     _analyticsKey: "hero",
     customerSatisfactionBanner: {
-      text: "Trusted by 500+ creators & freelancers",
+      text: "Built for small businesses that are owed money",
       avatars: { items: [] },
     },
-    title: "AI-powered payment\ncollection for creators",
+    title: "The follow-up you\nnever get around to",
     subtitle:
-      "Upload your contracts, and let Oryn autonomously pursue payments through personalized reminders, escalations, and instant USDC settlement.",
+      "Upload your contracts, and let Oryn chase every unpaid invoice for you — writing each reminder itself, escalating week by week, and stopping the moment you are paid.",
     actions: [
       {
         _id: "hero-cta-1",
@@ -63,7 +63,7 @@ export const orynContent = {
           icon: "channels",
           bullets: [
             "Email with professional templates",
-            "WhatsApp for 98% open rates",
+            "WhatsApp, where clients actually read",
             "SMS for urgent escalations",
           ],
         },
@@ -81,14 +81,14 @@ export const orynContent = {
         },
         {
           _id: "feature-4",
-          _title: "Instant USDC Settlement",
+          _title: "Paid Without the Awkward Conversation",
           description:
-            "Get paid the moment your client pays. No more waiting 3-5 business days for bank transfers or dealing with conversion fees.",
+            "You never have to send the uncomfortable message again. Oryn does the asking, every time, for as long as it takes.",
           icon: "money",
           bullets: [
-            "Instant settlement in USDC",
-            "Accept cards, bank, or crypto",
-            "No currency conversion delays",
+            "Reminders written for each client",
+            "Card, bank transfer or stablecoin",
+            "Stops the moment payment lands",
           ],
         },
       ],
@@ -100,7 +100,7 @@ export const orynContent = {
     heading: {
       badge: "How It Works",
       title: "Get Paid in 3 Simple Steps",
-      subtitle: "From unpaid invoice to USDC in your wallet — fully automated.",
+      subtitle: "From unpaid invoice to money in your account — without you chasing it.",
       align: "center" as const,
     },
     steps: [
@@ -125,7 +125,7 @@ export const orynContent = {
         number: "03",
         title: "Get Paid Instantly",
         description:
-          "When your client pays, you receive instant settlement in USDC. No waiting for bank transfers, no conversion fees — just immediate access to your funds.",
+          "The moment your client pays, the money reaches you and the agent stands down. No bank delay, no follow-up you forgot to send.",
         icon: "wallet",
       },
     ],
@@ -149,11 +149,11 @@ export const orynContent = {
             isMostPopular: false,
             list: {
               items: [
-                { _id: "s1", _title: "Up to $10,000/month in collections" },
+                { _id: "s1", _title: "Up to KSh 1M/month in collections" },
                 { _id: "s2", _title: "AI contract parsing" },
                 { _id: "s3", _title: "Email outreach" },
                 { _id: "s4", _title: "Basic dashboard" },
-                { _id: "s5", _title: "USDC settlement" },
+                { _id: "s5", _title: "Automatic follow-up" },
               ],
             },
           },
@@ -167,7 +167,7 @@ export const orynContent = {
             isMostPopular: true,
             list: {
               items: [
-                { _id: "p1", _title: "Up to $100,000/month in collections" },
+                { _id: "p1", _title: "Up to KSh 10M/month in collections" },
                 { _id: "p2", _title: "Multi-channel outreach (Email, SMS, WhatsApp)" },
                 { _id: "p3", _title: "Advanced AI escalation" },
                 { _id: "p4", _title: "Priority support" },
@@ -219,7 +219,7 @@ export const orynContent = {
           _analyticsKey: "faq-2",
           _title: "What payment methods does Oryn support?",
           answer:
-            "Oryn accepts payments via credit card, bank transfer, and cryptocurrency. All payments are settled to you in USDC for instant access to your funds.",
+            "Oryn accepts credit card, bank transfer and stablecoin, so your client pays the way that suits them. Whatever they choose, the money reaches you quickly.",
         },
         {
           _analyticsKey: "faq-3",
@@ -252,7 +252,7 @@ export const orynContent = {
   testimonials: {
     _id: "oryn-testimonials",
     heading: {
-      title: "Trusted by Creators & Freelancers",
+      title: "What Oryn Does",
       subtitle: "See what our users are saying",
       align: "center" as const,
     },
@@ -261,7 +261,7 @@ export const orynContent = {
         {
           _id: "testimonial-1",
           quote:
-            "Oryn collected $47,000 in outstanding invoices within my first month. I was skeptical about AI handling sensitive client conversations, but the results speak for themselves.",
+            "Oryn collected KSh 470,000 in outstanding invoices within my first month. I was skeptical about AI handling sensitive client conversations, but the results speak for themselves.",
           author: {
             _title: "Sarah Chen",
             role: "Freelance Designer",
@@ -271,7 +271,7 @@ export const orynContent = {
         {
           _id: "testimonial-2",
           quote:
-            "As an agency owner, chasing payments was eating up 20+ hours a month. Now Oryn handles it all, and our collection rate went from 78% to 96%.",
+            "Chasing payments used to sit on my to-do list for weeks. Oryn does it the same day, every time.",
           author: {
             _title: "Marcus Johnson",
             role: "Creative Agency Owner",
@@ -281,7 +281,7 @@ export const orynContent = {
         {
           _id: "testimonial-3",
           quote:
-            "The USDC settlement is a game-changer. No more waiting 3-5 business days for bank transfers. I get paid instantly.",
+            "I stopped writing awkward reminder emails. Oryn handles it and I find out when the money has landed.",
           author: {
             _title: "Alex Rivera",
             role: "Web Developer",
@@ -296,7 +296,7 @@ export const orynContent = {
     _id: "oryn-callout",
     title: "Stop Chasing. Start Collecting.",
     subtitle:
-      "Join hundreds of creators and freelancers who've recovered millions in unpaid invoices with Oryn.",
+      "Upload one invoice and let Oryn do the chasing.",
     cta: {
       _id: "callout-cta",
       href: "https://app.oryn.cc/sign-up",
@@ -324,10 +324,10 @@ export const orynContent = {
     _id: "oryn-supporters",
     title: "Supported By",
     items: [
-      { _id: "s1", _title: "Arc", logo: "/supporters/Arc.png" },
-      { _id: "s2", _title: "Circle", logo: "/supporters/Circle.png" },
-      { _id: "s3", _title: "Google DeepMind", logo: "/supporters/Google Deepmind.png" },
-      { _id: "s4", _title: "Surge", logo: "/supporters/Surge.png" },
+      { _id: "s2", _title: "Arc", logo: "/supporters/Arc.png" },
+      { _id: "s3", _title: "Circle", logo: "/supporters/Circle.png" },
+      { _id: "s4", _title: "Google DeepMind", logo: "/supporters/Google Deepmind.png" },
+      { _id: "s5", _title: "Surge", logo: "/supporters/Surge.png" },
     ],
   },
 
@@ -344,14 +344,14 @@ export const orynContent = {
       {
         _id: "benefit-1",
         icon: "clock",
-        title: "Save 20+ Hours Monthly",
+        title: "Stop Chasing Manually",
         description:
           "Automate repetitive follow-ups and payment reminders, freeing up your time to focus on creative work.",
       },
       {
         _id: "benefit-2",
         icon: "chart",
-        title: "96% Collection Rate",
+        title: "Follow-Up That Does Not Stop",
         description:
           "Our AI-powered approach achieves industry-leading collection rates through intelligent timing and messaging.",
       },
@@ -367,7 +367,7 @@ export const orynContent = {
         icon: "lightning",
         title: "Instant Settlements",
         description:
-          "Get paid immediately in USDC when your clients pay. No more waiting for bank transfers.",
+          "Money reaches you as soon as your client pays. No bank delay, no chasing.",
       },
       {
         _id: "benefit-5",

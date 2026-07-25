@@ -224,11 +224,63 @@ export const update = mutation({
     firstName: v.optional(v.string()),
     lastName: v.optional(v.string()),
     imageUrl: v.optional(v.string()),
+    phone: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const { id, ...updates } = args;
     await ctx.db.patch(id, {
       ...updates,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+// Update user's organization name
+export const updateOrganizationName = mutation({
+  args: {
+    userId: v.id("users"),
+    organizationName: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const user = await ctx.db.get(args.userId);
+    if (!user) throw new Error("User not found");
+
+    if (user.organizationId) {
+      // Update existing organization
+      await ctx.db.patch(user.organizationId, {
+        name: args.organizationName,
+        updatedAt: Date.now(),
+      });
+    } else {
+      // Create new organization and link to user
+      const orgId = await ctx.db.insert("organizations", {
+        name: args.organizationName,
+        ownerId: args.userId,
+        settings: {
+          whiteLabel: false,
+          defaultEscalationSchedule: [5, 10, 15, 20],
+        },
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      });
+
+      await ctx.db.patch(args.userId, {
+        organizationId: orgId,
+        updatedAt: Date.now(),
+      });
+    }
+  },
+});
+
+// Update user's Clerk ID (for dev/migration purposes)
+export const updateClerkId = mutation({
+  args: {
+    id: v.id("users"),
+    clerkId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.id, {
+      clerkId: args.clerkId,
       updatedAt: Date.now(),
     });
   },
@@ -246,11 +298,14 @@ export const updateSettings = mutation({
       timezone: v.optional(v.string()),
       currency: v.optional(
         v.union(
+          v.literal("KES"),
           v.literal("USD"),
           v.literal("EUR"),
           v.literal("GBP"),
           v.literal("CAD"),
-          v.literal("AUD")
+          v.literal("AUD"),
+          v.literal("USDC"),
+          v.literal("EURC")
         )
       ),
       autoEscalation: v.optional(v.boolean()),
@@ -663,12 +718,14 @@ export const saveOnboardingData = mutation({
     }),
     preferences: v.object({
       currency: v.union(
+        v.literal("KES"),
         v.literal("USD"),
         v.literal("EUR"),
         v.literal("GBP"),
         v.literal("CAD"),
         v.literal("AUD"),
-        v.literal("USDC")
+        v.literal("USDC"),
+        v.literal("EURC")
       ),
       autoEscalation: v.boolean(),
       escalationSchedule: v.optional(v.string()), // gentle, balanced, aggressive

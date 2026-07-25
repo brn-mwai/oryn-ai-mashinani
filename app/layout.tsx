@@ -246,24 +246,22 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 {[
                   "GET PAID FASTER",
                   "AI-POWERED COLLECTION",
-                  "INSTANT USDC SETTLEMENT",
+                  "PAID WITHOUT THE AWKWARD CHASE",
                   "AUTONOMOUS PAYMENT RECOVERY",
                   "5% SUCCESS FEE",
                   "NO UPFRONT COSTS",
                   "96% COLLECTION RATE",
                   "MULTI-CHANNEL OUTREACH",
                   "SMART ESCALATION",
-                  "TRUSTED BY 500+ CREATORS",
                   "GET PAID FASTER",
                   "AI-POWERED COLLECTION",
-                  "INSTANT USDC SETTLEMENT",
+                  "PAID WITHOUT THE AWKWARD CHASE",
                   "AUTONOMOUS PAYMENT RECOVERY",
                   "5% SUCCESS FEE",
                   "NO UPFRONT COSTS",
                   "96% COLLECTION RATE",
                   "MULTI-CHANNEL OUTREACH",
                   "SMART ESCALATION",
-                  "TRUSTED BY 500+ CREATORS",
                 ].map((message, index) => (
                   <span
                     key={index}

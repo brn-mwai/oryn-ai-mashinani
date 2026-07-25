@@ -30,6 +30,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const CURRENCY_CONFIG: Record<string, { symbol: string; locale: string; code: string }> = {
+  KES: { symbol: "KSh", locale: "en-KE", code: "KES" },
   USD: { symbol: "$", locale: "en-US", code: "USD" },
   EUR: { symbol: "\u20AC", locale: "de-DE", code: "EUR" },
   GBP: { symbol: "\u00A3", locale: "en-GB", code: "GBP" },
@@ -58,8 +59,8 @@ export default function DashboardPage() {
     user?.id ? { clerkId: user.id } : "skip"
   );
 
-  const userCurrency = convexUser?.settings?.currency || "USD";
-  const currencyConfig = CURRENCY_CONFIG[userCurrency] || CURRENCY_CONFIG.USD;
+  const userCurrency = convexUser?.settings?.currency || "KES";
+  const currencyConfig = CURRENCY_CONFIG[userCurrency] || CURRENCY_CONFIG.KES;
 
   // Get claims stats
   const claimsStats = useQuery(

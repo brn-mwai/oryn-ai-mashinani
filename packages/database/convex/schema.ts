@@ -3,6 +3,7 @@ import { v } from "convex/values";
 
 // Reusable validators
 const currencyValidator = v.union(
+  v.literal("KES"),
   v.literal("USD"),
   v.literal("EUR"),
   v.literal("GBP"),
@@ -454,6 +455,7 @@ export default defineSchema({
     currency: currencyValidator,
     method: v.union(
       v.literal("card"),
+      v.literal("mpesa"),
       v.literal("bank_transfer"),
       v.literal("ach"),
       v.literal("usdc"),
@@ -563,6 +565,7 @@ export default defineSchema({
     // Circle Arc specific fields
     arcWalletId: v.optional(v.string()), // Arc-native wallet ID
     arcAddress: v.optional(v.string()), // Arc blockchain address
+    arcPrivateKey: v.optional(v.string()), // Encrypted private key for signing Arc transactions
     arcEnabled: v.optional(v.boolean()), // Is Arc enabled for this wallet
 
     // Auto-forward policy (Circle)
@@ -589,6 +592,60 @@ export default defineSchema({
     .index("by_arc_wallet", ["arcWalletId"])
     .index("by_arc_address", ["arcAddress"])
     .index("by_chain", ["circleChain"]),
+
+  // ============================================
+  // Linked Cards (for off-ramping to bank)
+  // ============================================
+  linkedCards: defineTable({
+    userId: v.id("users"),
+
+    // Card details (tokenized - we never store full card numbers)
+    last4: v.string(),
+    brand: v.union(
+      v.literal("Visa"),
+      v.literal("Mastercard"),
+      v.literal("Amex"),
+      v.literal("Discover"),
+      v.literal("Card")
+    ),
+    expiryMonth: v.string(),
+    expiryYear: v.string(),
+    holderName: v.string(),
+
+    // Billing address
+    billingAddress: v.optional(v.object({
+      street: v.optional(v.string()),
+      city: v.optional(v.string()),
+      state: v.optional(v.string()),
+      zip: v.optional(v.string()),
+      country: v.optional(v.string()),
+    })),
+
+    // External token (from payment processor like Stripe)
+    stripePaymentMethodId: v.optional(v.string()),
+
+    // Status
+    status: v.union(
+      v.literal("active"),
+      v.literal("expired"),
+      v.literal("removed")
+    ),
+
+    // Verification status
+    verified: v.boolean(),
+    verifiedAt: v.optional(v.number()),
+
+    // Default card for offramp
+    isDefault: v.boolean(),
+
+    // Timestamps
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    lastUsedAt: v.optional(v.number()),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_and_status", ["userId", "status"])
+    .index("by_stripe_payment_method", ["stripePaymentMethodId"]),
 
   // ============================================
   // Transactions
@@ -709,20 +766,8 @@ export default defineSchema({
     parsingModel: v.optional(aiModelValidator), // Which AI model parsed it
     parsingAttempts: v.number(), // Fallback tracking
 
-    // Extracted structured data
-    extractedData: v.optional(v.object({
-      title: v.optional(v.string()),
-      date: v.optional(v.string()),
-      parties: v.optional(v.array(v.string())),
-      amounts: v.optional(v.array(v.object({
-        value: v.number(),
-        currency: v.string(),
-        description: v.optional(v.string()),
-      }))),
-      dueDate: v.optional(v.string()),
-      terms: v.optional(v.string()),
-      summary: v.optional(v.string()),
-    })),
+    // Extracted structured data (flexible format from AI parsing)
+    extractedData: v.optional(v.any()),
 
     // Vector embedding for semantic search
     embedding: v.optional(v.array(v.float64())),
@@ -980,6 +1025,7 @@ export default defineSchema({
     methods: v.array(
       v.union(
         v.literal("card"),
+        v.literal("mpesa"),
         v.literal("bank_transfer"),
         v.literal("ach"),
         v.literal("usdc"),

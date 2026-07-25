@@ -14,7 +14,7 @@ import { Section } from "../../common/section-wrapper";
 function Marquee() {
   const messages = [
     "AI-POWERED COLLECTION",
-    "INSTANT USDC SETTLEMENT",
+    "PAID WITHOUT THE AWKWARD CHASE",
     "AUTONOMOUS PAYMENT RECOVERY",
     "MULTI-CHANNEL OUTREACH",
     "SMART ESCALATION",
@@ -22,7 +22,6 @@ function Marquee() {
     "YOU'RE OWED MONEY. ORYN COLLECTS IT.",
     "5% SUCCESS FEE",
     "NO UPFRONT COSTS",
-    "TRUSTED BY 500+ CREATORS",
   ];
 
   const allMessages = [...messages, ...messages];
@@ -117,10 +116,10 @@ function DashboardPreview() {
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
             <div>
               <p className="text-[#1A2B32]/50 text-xs sm:text-sm mb-1">Total Collected</p>
-              <h3 className="text-[#1A2B32] text-2xl sm:text-4xl font-semibold tracking-tight">$124,892<span className="text-lg sm:text-2xl">.00</span></h3>
+              <h3 className="text-[#1A2B32] text-2xl sm:text-4xl font-semibold tracking-tight">KSh 1,240,800<span className="text-lg sm:text-2xl">.00</span></h3>
               <div className="flex items-center gap-2 mt-1 sm:mt-2 flex-wrap">
-                <span className="text-[10px] sm:text-xs text-[#22c55e] font-medium bg-[#22c55e]/10 px-2 py-0.5 rounded-full">↑ 12.4% this month</span>
-                <span className="text-[10px] sm:text-xs text-[#1A2B32]/40">94.2% recovery rate</span>
+                <span className="text-[10px] sm:text-xs text-[#22c55e] font-medium bg-[#22c55e]/10 px-2 py-0.5 rounded-full">Across 18 open invoices</span>
+                <span className="text-[10px] sm:text-xs text-[#1A2B32]/40">7 clients</span>
               </div>
             </div>
             <div className="hidden sm:flex items-center gap-1 text-xs text-[#1A2B32]/60 bg-[#f8f9fa] rounded-lg p-1">
@@ -188,8 +187,8 @@ function DashboardPreview() {
           {/* Stats Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
             {[
-              { label: "Active Invoices", value: "12", sublabel: "$48,200 pending", color: "#D2B4FA" },
-              { label: "Collected Today", value: "$8,420", sublabel: "3 invoices", color: "#22c55e" },
+              { label: "Active Invoices", value: "12", sublabel: "KSh 482,000 pending", color: "#D2B4FA" },
+              { label: "Collected Today", value: "KSh 84,200", sublabel: "3 invoices", color: "#22c55e" },
               { label: "Avg Collection Time", value: "4.2 days", sublabel: "↓ 1.3 days", color: "#D2B4FA" },
               { label: "Agent Actions", value: "28", sublabel: "This week", color: "#1A2B32" },
             ].map((stat) => (
@@ -392,13 +391,13 @@ function FeatureVisualFollowups() {
   );
 }
 
-// Visual 4: USDC settlement flow
+// Visual 4: settlement flow
 function FeatureVisualSettlement() {
   return (
     <div className="relative h-full min-h-[340px] flex items-center justify-center p-3">
       <img
         src="/features/settlement.png"
-        alt="Instant USDC Settlement - Cards, Bank, and Crypto to USDC"
+        alt="Settlement flow - card, bank transfer or stablecoin"
         className="w-full h-full object-contain border border-[--border] dark:border-[#3a4f58]"
       />
     </div>
@@ -563,32 +562,32 @@ export function OrynWhoUsesOryn() {
   const userTypes = [
     {
       _id: "user-1",
-      title: "Freelancers",
-      description: "Never chase payments again. Focus on your craft while Oryn handles collection.",
+      title: "Suppliers & Wholesalers",
+      description: "You released the stock on credit. Oryn chases the balance so you can restock.",
       image: "/images/users/Freelancers.png",
     },
     {
       _id: "user-2",
-      title: "Agencies",
-      description: "Scale collections without scaling headcount. Recover revenue across all clients.",
+      title: "Contractors & Fundis",
+      description: "The job is finished and signed off. Oryn follows up until the final payment lands.",
       image: "/images/users/Agencies.png",
     },
     {
       _id: "user-3",
-      title: "SaaS Companies",
-      description: "Recover failed payments and reduce churn with intelligent dunning sequences.",
+      title: "Agencies & Consultancies",
+      description: "Retainers and project invoices, chased on schedule without straining the client.",
       image: "/images/users/SaaS Companies.png",
     },
     {
       _id: "user-4",
-      title: "Creators",
-      description: "Spend time creating, not collecting. Get paid for your work automatically.",
+      title: "Transport & Logistics",
+      description: "The load was delivered weeks ago. Oryn keeps asking so you do not have to.",
       image: "/images/users/Creators.png",
     },
     {
       _id: "user-5",
-      title: "Consultants",
-      description: "Professional payment recovery that maintains client relationships.",
+      title: "Freelancers",
+      description: "No finance team, no one to chase for you. Oryn is the follow-up you skip.",
       image: "/images/users/Consultants.png",
     },
   ];
@@ -1076,7 +1075,6 @@ export function OrynHomePage() {
   return (
     <>
       <OrynHero />
-      <OrynPartners />
       <OrynFeatures />
       <OrynHowItWorks />
       <OrynWhoUsesOryn />

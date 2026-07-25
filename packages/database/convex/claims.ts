@@ -96,6 +96,7 @@ export const create = mutation({
     amount: v.number(),
     currency: v.optional(
       v.union(
+        v.literal("KES"),
         v.literal("USD"),
         v.literal("EUR"),
         v.literal("GBP"),

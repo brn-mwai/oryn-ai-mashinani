@@ -23,6 +23,7 @@ export const create = mutation({
     fee: v.optional(v.number()),
     netAmount: v.optional(v.number()),
     currency: v.union(
+      v.literal("KES"),
       v.literal("USD"),
       v.literal("EUR"),
       v.literal("GBP"),

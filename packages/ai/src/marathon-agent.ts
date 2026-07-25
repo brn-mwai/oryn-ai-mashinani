@@ -10,10 +10,46 @@
  */
 
 import { ConvexHttpClient } from "convex/browser";
-import { api } from "@oryn/database";
-import type { Id } from "@oryn/database";
+import { api } from "@oryn/database/server";
+import type { Id } from "@oryn/database/server";
 import { AIClient } from "./client";
 import { generateMessage } from "./gemini";
+import {
+  startAgentSessionTrace,
+  createAgentActionSpan,
+  endAgentActionSpan,
+  logSelfCorrection,
+  endAgentSessionTrace,
+  logCollectionMetrics,
+  traceMessageGeneration,
+  logger,
+} from "./opik";
+
+// Notification function types (injected at runtime)
+export interface NotificationFunctions {
+  sendEmail: (input: {
+    to: string;
+    subject: string;
+    text: string;
+    html?: string;
+    tags?: Array<{ name: string; value: string }>;
+  }) => Promise<{ id: string }>;
+  sendSms: (input: { to: string; body: string }) => Promise<{ sid: string }>;
+  sendWhatsApp: (input: { to: string; text: string }) => Promise<{ messageId: string }>;
+  isResendConfigured: () => boolean;
+  isTwilioConfigured: () => boolean;
+  isWhatsAppConfigured: () => boolean;
+}
+
+// Default no-op implementations
+const defaultNotifications: NotificationFunctions = {
+  sendEmail: async () => { throw new Error("Email not configured - pass notification functions to AgentConfig"); },
+  sendSms: async () => { throw new Error("SMS not configured - pass notification functions to AgentConfig"); },
+  sendWhatsApp: async () => { throw new Error("WhatsApp not configured - pass notification functions to AgentConfig"); },
+  isResendConfigured: () => false,
+  isTwilioConfigured: () => false,
+  isWhatsAppConfigured: () => false,
+};
 
 // Types
 export type ThinkingLevel =
@@ -90,6 +126,7 @@ export interface AgentConfig {
   maxTokensPerSession?: number;
   enableSelfCorrection?: boolean;
   dryRun?: boolean;
+  notifications?: NotificationFunctions;
 }
 
 export interface AgentResult {
@@ -145,9 +182,11 @@ export class MarathonAgent {
   private convex: ConvexHttpClient;
   private ai: AIClient;
   private config: AgentConfig;
+  private notifications: NotificationFunctions;
   private sessionId?: Id<"agentSessions">;
   private tokensUsed: number = 0;
   private actionsExecuted: number = 0;
+  private opikTrace: any = null;
 
   constructor(config: AgentConfig) {
     this.config = {
@@ -159,6 +198,7 @@ export class MarathonAgent {
     };
     this.convex = new ConvexHttpClient(config.convexUrl);
     this.ai = new AIClient();
+    this.notifications = config.notifications ?? defaultNotifications;
   }
 
   /**
@@ -201,6 +241,17 @@ export class MarathonAgent {
         sessionType,
         model: "gemini-2.0-flash",
       });
+
+      // Start Opik trace for this agent session
+      this.opikTrace = await startAgentSessionTrace(
+        this.sessionId as string,
+        claimId as string,
+        {
+          level: thought.level,
+          escalationLevel: thought.escalationLevel,
+          context: thought.context,
+        }
+      );
 
       // Run the agent loop
       let currentThought = thought as ThoughtSignature;
@@ -255,6 +306,38 @@ export class MarathonAgent {
         tokensUsed: this.tokensUsed,
       });
 
+      // End Opik trace with results
+      await endAgentSessionTrace(this.opikTrace, {
+        success: true,
+        actionsExecuted: this.actionsExecuted,
+        tokensUsed: this.tokensUsed,
+        thoughtLevel: currentThought.level,
+        escalationLevel: currentThought.escalationLevel,
+        corrections: currentThought.totalCorrections,
+      });
+
+      // Log collection metrics for terminal states
+      if (currentThought.level === "COLLECTED" || currentThought.level === "FAILED") {
+        const recoveryRate = currentThought.level === "COLLECTED" ? 1.0 : 0.0;
+        const channels = [...new Set(currentThought.context.attemptHistory.map(a => a.channel))];
+        const maxEscalation = 4;
+        const escalationEconomy = 1 - (currentThought.escalationLevel / maxEscalation);
+        const benchmarkDays = 30;
+        const efficiency = currentThought.context.daysSinceDue > 0
+          ? Math.max(0, 1 - (currentThought.context.daysSinceDue / (benchmarkDays * 2)))
+          : 1.0;
+
+        await logCollectionMetrics({
+          claimId: claimId as string,
+          recoveryRate,
+          efficiency,
+          escalationEconomy,
+          daysToResolve: currentThought.context.daysSinceDue,
+          channelsUsed: channels,
+          totalAttempts: currentThought.context.attemptHistory.length,
+        });
+      }
+
       return {
         success: true,
         thoughtSignature: currentThought,
@@ -269,6 +352,16 @@ export class MarathonAgent {
             : undefined,
       };
     } catch (error) {
+      // End Opik trace with failure
+      await endAgentSessionTrace(this.opikTrace, {
+        success: false,
+        actionsExecuted: this.actionsExecuted,
+        tokensUsed: this.tokensUsed,
+        thoughtLevel: "FAILED",
+        escalationLevel: 0,
+        corrections: 0,
+      });
+
       // Complete session with error
       if (this.sessionId) {
         await this.convex.mutation(api.agentSessions.complete, {
@@ -290,6 +383,13 @@ export class MarathonAgent {
   ): Promise<{ success: boolean; error?: string }> {
     const { action, channel } = thought.nextAction;
     const startedAt = Date.now();
+
+    // Create Opik span for this action
+    const actionSpan = createAgentActionSpan(this.opikTrace, action, {
+      channel,
+      escalationLevel: thought.escalationLevel,
+      level: thought.level,
+    });
 
     try {
       let result: any;
@@ -357,10 +457,21 @@ export class MarathonAgent {
         this.tokensUsed += result.tokensUsed;
       }
 
+      // End Opik action span
+      endAgentActionSpan(actionSpan, {
+        success: result.success,
+        data: result.data,
+        error: result.error,
+        tokensUsed: result.tokensUsed,
+      });
+
       return { success: result.success, error: result.error };
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error";
+
+      // End Opik action span with failure
+      endAgentActionSpan(actionSpan, { success: false, error: errorMessage });
 
       if (this.sessionId) {
         await this.convex.mutation(api.agentSessions.recordAction, {
@@ -427,22 +538,136 @@ export class MarathonAgent {
 
     const tone = ESCALATION_TONES[thought.escalationLevel] ?? "professional";
 
-    // Generate message using AI
-    const message = await generateMessage(
-      {
-        clientName: thought.context.clientName ?? "Client",
-        amount: thought.context.invoiceAmount,
-        currency: thought.context.currency,
-        escalationLevel: thought.escalationLevel,
-        previousMessages: thought.context.attemptHistory.map((a) =>
-          `${a.channel} on ${new Date(a.sentAt).toISOString()}: ${a.messageType}`
-        ),
-      },
+    // Get client data for recipient
+    const claim = await this.convex.query(api.claims.get, { id: thought.claimId });
+    if (!claim) {
+      return { success: false, error: "Claim not found" };
+    }
+
+    const client = await this.convex.query(api.clients.get, { id: claim.clientId });
+    if (!client) {
+      return { success: false, error: "Client not found" };
+    }
+
+    // Verify recipient exists for channel
+    const recipient = this.getRecipientForChannel(client, channel);
+    if (!recipient) {
+      return {
+        success: false,
+        error: `No ${channel} contact found for client ${client.name}`
+      };
+    }
+
+    // Generate message using AI (with Opik tracing)
+    const generatedMessage = await traceMessageGeneration(
+      "gemini-2.0-flash",
       channel,
-      tone as any
+      tone,
+      () => generateMessage(
+        {
+          clientName: thought.context.clientName ?? client.name ?? "Client",
+          amount: thought.context.invoiceAmount,
+          currency: thought.context.currency,
+          escalationLevel: thought.escalationLevel,
+          previousMessages: thought.context.attemptHistory.map((a) =>
+            `${a.channel} on ${new Date(a.sentAt).toISOString()}: ${a.messageType}`
+          ),
+        },
+        channel,
+        tone as any
+      ),
+      {
+        financial: {
+          invoiceAmount: thought.context.invoiceAmount,
+          currency: thought.context.currency,
+          escalationLevel: thought.escalationLevel,
+          daysOverdue: thought.context.daysSinceDue,
+          attemptCount: thought.context.attemptHistory.length,
+        },
+        messageContext: {
+          clientName: thought.context.clientName ?? client.name ?? "Client",
+          amount: thought.context.invoiceAmount,
+          escalationLevel: thought.escalationLevel,
+          channel,
+          tone,
+        },
+      }
     );
 
-    // Record the attempt
+    // Generate subject for email
+    const subject = channel === "email"
+      ? this.generateEmailSubject(thought, tone)
+      : undefined;
+
+    // Create message record in database
+    const messageId = await this.convex.mutation(api.messages.create, {
+      claimId: thought.claimId,
+      userId: thought.userId,
+      clientId: claim.clientId,
+      channel,
+      direction: "outbound",
+      content: generatedMessage.content,
+      subject,
+      status: "queued",
+      metadata: {
+        tone,
+        escalationLevel: thought.escalationLevel,
+        aiGenerated: true,
+      },
+    });
+
+    // Actually send the message via the appropriate channel
+    let sendResult: { success: boolean; providerId?: string; error?: string };
+
+    try {
+      sendResult = await this.sendViaChannel(
+        channel,
+        recipient,
+        generatedMessage.content,
+        subject
+      );
+    } catch (error) {
+      // Mark message as failed
+      await this.convex.mutation(api.messages.updateStatus, {
+        id: messageId,
+        status: "failed",
+        metadata: { error: error instanceof Error ? error.message : "Send failed" },
+      });
+
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Failed to send message",
+        tokensUsed: generatedMessage.tokensUsed,
+      };
+    }
+
+    if (!sendResult.success) {
+      await this.convex.mutation(api.messages.updateStatus, {
+        id: messageId,
+        status: "failed",
+        metadata: { error: sendResult.error },
+      });
+
+      return {
+        success: false,
+        error: sendResult.error,
+        tokensUsed: generatedMessage.tokensUsed,
+      };
+    }
+
+    // Mark message as sent with provider ID for webhook tracking
+    const providerIdField = channel === "email"
+      ? { resendId: sendResult.providerId }
+      : channel === "sms"
+        ? { twilioSid: sendResult.providerId }
+        : { whatsappMsgId: sendResult.providerId };
+
+    await this.convex.mutation(api.messages.markSent, {
+      id: messageId,
+      ...providerIdField,
+    });
+
+    // Record the attempt in thought signature
     await this.convex.mutation(api.thoughtSignatures.recordAttempt, {
       id: thought._id,
       attempt: {
@@ -453,14 +678,123 @@ export class MarathonAgent {
       },
     });
 
-    // In a real implementation, this would call the notification API
-    // to actually send the message
-
     return {
       success: true,
-      data: { channel, tone, messageGenerated: true },
-      tokensUsed: message.tokensUsed,
+      data: {
+        channel,
+        tone,
+        messageId: messageId,
+        providerId: sendResult.providerId,
+        recipient,
+      },
+      tokensUsed: generatedMessage.tokensUsed,
     };
+  }
+
+  /**
+   * Get the recipient contact for a given channel
+   */
+  private getRecipientForChannel(
+    client: { email?: string; phone?: string; whatsapp?: string },
+    channel: "email" | "sms" | "whatsapp"
+  ): string | null {
+    switch (channel) {
+      case "email":
+        return client.email ?? null;
+      case "sms":
+        return client.phone ?? null;
+      case "whatsapp":
+        return client.whatsapp ?? client.phone ?? null;
+      default:
+        return null;
+    }
+  }
+
+  /**
+   * Generate email subject based on tone/escalation
+   */
+  private generateEmailSubject(thought: ThoughtSignature, tone: string): string {
+    const amount = new Intl.NumberFormat("en-KE", {
+      style: "currency",
+      currency: thought.context.currency || "KES",
+    }).format(thought.context.invoiceAmount);
+
+    switch (tone) {
+      case "friendly":
+        return `Friendly reminder: Payment of ${amount} due`;
+      case "professional":
+        return `Payment reminder: ${amount} outstanding`;
+      case "firm":
+        return `Important: Payment of ${amount} overdue`;
+      case "urgent":
+        return `Urgent: Immediate payment required - ${amount}`;
+      case "final":
+        return `Final Notice: ${amount} - Immediate action required`;
+      default:
+        return `Payment reminder: ${amount}`;
+    }
+  }
+
+  /**
+   * Send message via the appropriate channel
+   */
+  private async sendViaChannel(
+    channel: "email" | "sms" | "whatsapp",
+    recipient: string,
+    content: string,
+    subject?: string
+  ): Promise<{ success: boolean; providerId?: string; error?: string }> {
+    switch (channel) {
+      case "email": {
+        if (!this.notifications.isResendConfigured()) {
+          return { success: false, error: "Email (Resend) is not configured" };
+        }
+
+        const result = await this.notifications.sendEmail({
+          to: recipient,
+          subject: subject ?? "Payment Reminder",
+          text: content,
+          html: `<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+            <p>${content.replace(/\n/g, "</p><p>")}</p>
+          </div>`,
+          tags: [
+            { name: "type", value: "payment_reminder" },
+            { name: "source", value: "marathon_agent" },
+          ],
+        });
+
+        return { success: true, providerId: result.id };
+      }
+
+      case "sms": {
+        if (!this.notifications.isTwilioConfigured()) {
+          return { success: false, error: "SMS (Twilio) is not configured" };
+        }
+
+        const result = await this.notifications.sendSms({
+          to: recipient,
+          body: content,
+        });
+
+        return { success: true, providerId: result.sid };
+      }
+
+      case "whatsapp": {
+        if (!this.notifications.isWhatsAppConfigured()) {
+          return { success: false, error: "WhatsApp is not configured" };
+        }
+
+        const result = await this.notifications.sendWhatsApp({
+          to: recipient,
+          text: content,
+        });
+
+        return { success: true, providerId: result.messageId };
+      }
+
+      default:
+        return { success: false, error: `Unknown channel: ${channel}` };
+    }
   }
 
   /**
@@ -541,7 +875,7 @@ export class MarathonAgent {
     await this.convex.mutation(api.thoughtSignatures.markCollected, {
       id: thought._id,
       paymentAmount: thought.context.paymentReceived ?? thought.context.invoiceAmount,
-      transactionHash: thought.context.paymentTransactionHash,
+      paymentHash: thought.context.paymentTransactionHash,
     });
 
     return { success: true, data: { level: "COLLECTED" } };
@@ -681,15 +1015,20 @@ export class MarathonAgent {
       reasoning = `Action failed (${failureReason}), will retry later`;
     }
 
+    // Log to Opik
+    logSelfCorrection(this.opikTrace, {
+      failedAction,
+      failureReason,
+      correctedTo,
+      reasoning,
+    });
+
     // Record the correction
     await this.convex.mutation(api.thoughtSignatures.recordCorrection, {
       id: thought._id,
-      correction: {
-        failedAction,
-        failureReason,
-        correctedTo,
-        reasoning,
-      },
+      failedAction,
+      failureReason,
+      correctedAction: correctedTo,
     });
 
     // Set the corrected action

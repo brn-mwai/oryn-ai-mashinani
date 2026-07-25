@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="assets/banner.png" alt="Oryn" width="100%">
-</p>
-
 <h1 align="center">Oryn</h1>
 
 <p align="center">

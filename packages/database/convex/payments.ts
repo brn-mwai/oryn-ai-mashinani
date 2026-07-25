@@ -69,11 +69,14 @@ export const create = mutation({
     clientId: v.id("clients"),
     amount: v.number(),
     currency: v.union(
+      v.literal("KES"),
       v.literal("USD"),
       v.literal("EUR"),
       v.literal("GBP"),
       v.literal("CAD"),
-      v.literal("AUD")
+      v.literal("AUD"),
+      v.literal("USDC"),
+      v.literal("EURC")
     ),
     method: v.union(
       v.literal("card"),
@@ -81,24 +84,120 @@ export const create = mutation({
       v.literal("usdc"),
       v.literal("other")
     ),
+    status: v.optional(v.union(
+      v.literal("pending"),
+      v.literal("processing"),
+      v.literal("completed"),
+      v.literal("failed")
+    )),
     stripePaymentIntentId: v.optional(v.string()),
     circlePaymentId: v.optional(v.string()),
+    transactionHash: v.optional(v.string()),
     metadata: v.optional(v.any()),
   },
   handler: async (ctx, args) => {
-    return await ctx.db.insert("payments", {
+    const status = args.status || "pending";
+    const now = Date.now();
+
+    const paymentId = await ctx.db.insert("payments", {
       claimId: args.claimId,
       userId: args.userId,
       clientId: args.clientId,
       amount: args.amount,
       currency: args.currency,
       method: args.method,
-      status: "pending",
+      status: status,
       stripePaymentIntentId: args.stripePaymentIntentId,
       circlePaymentId: args.circlePaymentId,
+      transactionHash: args.transactionHash,
       metadata: args.metadata,
-      createdAt: Date.now(),
+      createdAt: now,
+      completedAt: status === "completed" ? now : undefined,
     });
+
+    // If payment is completed, update claim and wallet
+    if (status === "completed") {
+      // Get the claim
+      const claim = await ctx.db.get(args.claimId);
+      if (claim) {
+        // Update claim amountPaid
+        const newAmountPaid = (claim.amountPaid || 0) + args.amount;
+        const updates: Record<string, unknown> = {
+          amountPaid: newAmountPaid,
+          updatedAt: now,
+        };
+
+        // Mark as collected if fully paid
+        if (newAmountPaid >= claim.amount) {
+          updates.status = "collected";
+        }
+
+        await ctx.db.patch(args.claimId, updates);
+
+        // Update client
+        const client = await ctx.db.get(claim.clientId);
+        if (client) {
+          const newOwed = Math.max(0, client.totalOwed - args.amount);
+          await ctx.db.patch(claim.clientId, {
+            totalOwed: newOwed,
+            totalPaid: (client.totalPaid || 0) + args.amount,
+            status: newOwed <= 0 ? "paid" : "owing",
+            updatedAt: now,
+          });
+        }
+      }
+
+      // Credit user's wallet
+      const wallet = await ctx.db
+        .query("wallets")
+        .withIndex("by_user", (q) => q.eq("userId", args.userId))
+        .filter((q) => q.eq(q.field("type"), "usdc"))
+        .first();
+
+      if (wallet) {
+        // Lower fee for USDC (1%)
+        const feeRate = args.method === "usdc" ? 0.01 : 0.029;
+        const fixedFee = args.method === "card" ? 0.30 : 0;
+        const fee = args.amount * feeRate + fixedFee;
+        const netAmount = args.amount - fee;
+
+        await ctx.db.patch(wallet._id, {
+          balance: (wallet.balance || 0) + netAmount,
+          updatedAt: now,
+        });
+
+        // Create transaction record
+        await ctx.db.insert("transactions", {
+          walletId: wallet._id,
+          userId: args.userId,
+          type: "payment_received",
+          amount: netAmount,
+          currency: args.currency,
+          status: "completed",
+          reference: paymentId,
+          description: `Payment received via ${args.method}`,
+          transactionHash: args.transactionHash,
+          createdAt: now,
+          completedAt: now,
+        });
+      }
+
+      // Create notification
+      await ctx.db.insert("notifications", {
+        userId: args.userId,
+        type: "payment_received",
+        title: "Payment Received",
+        message: `You received a payment of $${args.amount.toFixed(2)} via ${args.method.toUpperCase()}`,
+        read: false,
+        link: `/dashboard/claims/${args.claimId}`,
+        priority: "normal",
+        claimId: args.claimId,
+        paymentId: paymentId,
+        createdAt: now,
+      });
+    }
+
+    return paymentId;
   },
 });
 

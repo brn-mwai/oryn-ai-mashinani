@@ -59,7 +59,7 @@ export interface UserSettings {
   currency: Currency;
 }
 
-export type Currency = "USD" | "EUR" | "GBP" | "CAD" | "AUD";
+export type Currency = "KES" | "USD" | "EUR" | "GBP" | "CAD" | "AUD";
 
 // Client (Debtor) types
 export interface Client {
@@ -367,6 +367,13 @@ export type NLPIntent =
   | "REQUEST_PAYMENT"
   | "WITHDRAW_FUNDS"
   | "GET_STATS"
+  // Wallet intents
+  | "CHECK_WALLET"
+  | "SEND_USDC"
+  | "FORWARD_PAYMENT"
+  | "HOLD_PAYMENT"
+  | "GET_WALLET_ADDRESS"
+  | "CREATE_WALLET"
   | "UNKNOWN";
 
 export interface NLPEntities {
@@ -376,6 +383,13 @@ export interface NLPEntities {
   amount?: number;
   channel?: string;
   dueDate?: number;
+  // Wallet entities
+  walletId?: string;
+  walletAddress?: string;
+  destinationAddress?: string;
+  walletChain?: "arc" | "ethereum" | "polygon" | "solana" | "avalanche";
+  paymentId?: string;
+  transactionHash?: string;
 }
 
 export interface NLPAction {
@@ -400,7 +414,15 @@ export type NLPActionType =
   | "CREATE_PAYMENT_LINK"
   | "INITIATE_WITHDRAWAL"
   | "LOG_AI_ACTION"
-  | "FETCH_STATS";
+  | "FETCH_STATS"
+  // Wallet action types
+  | "RESOLVE_WALLET"
+  | "CHECK_WALLET_BALANCE"
+  | "SEND_USDC_TRANSACTION"
+  | "FORWARD_PAYMENT"
+  | "HOLD_PAYMENT"
+  | "GET_WALLET_ADDRESS"
+  | "CREATE_ARC_WALLET";
 
 export type NLPActionStatus = "pending" | "executing" | "completed" | "failed";
 
@@ -434,6 +456,8 @@ export interface MessagesByChannel {
 export const HIGH_RISK_ACTIONS: NLPActionType[] = [
   "ESCALATE_CLAIM", // Level 4 escalation
   "INITIATE_WITHDRAWAL", // > $1000
+  "SEND_USDC_TRANSACTION", // Sending crypto
+  "FORWARD_PAYMENT", // Forwarding payments
 ];
 
 export const HIGH_RISK_INTENTS: NLPIntent[] = [
