@@ -5,21 +5,26 @@
 <h1 align="center">Oryn</h1>
 
 <p align="center">
-  <strong>The Autonomous AI Payment Agent for Freelancers</strong><br>
+  <strong>The follow-up small businesses never get around to doing.</strong><br>
   <em>You Work. Oryn Collects.</em>
 </p>
 
 <p align="center">
-  <a href="https://oryn.cc">Live Demo</a> |
-  <a href="#watch-the-demo">Watch Demo</a> |
-  <a href="#circle-arc-integration">Arc Integration</a> |
-  <a href="#autonomous-agent-architecture">AI Architecture</a>
+  You finished the job and sent the invoice. Then nothing. Chasing that money is awkward,<br>
+  it eats hours, and it strains the client you need for the next job, so most people give up.<br>
+  Oryn does the chasing for you, on its own, until you are paid.
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Circle-Arc%20Blockchain-00D395?style=for-the-badge&logo=circle" alt="Circle Arc">
-  <img src="https://img.shields.io/badge/USDC-Native%20Payments-2775CA?style=for-the-badge" alt="USDC">
+  <a href="https://oryn.cc">Live Demo</a> |
+  <a href="PITCH.md">Pitch</a> |
+  <a href="#autonomous-agent-architecture">AI Architecture</a> |
+  <a href="#circle-arc-integration">Payment Rails</a>
+</p>
+
+<p align="center">
   <img src="https://img.shields.io/badge/AI-Marathon%20Agent-FF6B6B?style=for-the-badge" alt="AI Agent">
+  <img src="https://img.shields.io/badge/AI%20Mashinani-Biashara%20Track-F97316?style=for-the-badge" alt="Biashara Track">
   <img src="https://img.shields.io/badge/Convex-Real--time%20DB-FF6B35?style=for-the-badge" alt="Convex">
 </p>
 
@@ -436,6 +441,37 @@ pnpm dev
 | LinkedIn | [Brian Mwai](https://linkedin.com/in/brn-mwai) |
 
 Built by **Hausor Labs**
+
+---
+
+## Team
+
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/brn-mwai"><img src="https://github.com/brn-mwai.png?size=100" width="80" alt="brn-mwai"><br><b>Brian Mwai</b></a><br>
+      <sub>Architecture, agent runtime</sub>
+    </td>
+    <td align="center">
+      <a href="https://github.com/Mathew-Rym"><img src="https://github.com/Mathew-Rym.png?size=100" width="80" alt="Mathew-Rym"><br><b>Mathew Rym</b></a><br>
+      <sub>Frontend, demo experience</sub>
+    </td>
+    <td align="center">
+      <a href="https://github.com/Abdikhafar-hub"><img src="https://github.com/Abdikhafar-hub.png?size=100" width="80" alt="Abdikhafar-hub"><br><b>Abdikhafar</b></a><br>
+      <sub>Agent reasoning, security</sub>
+    </td>
+    <td align="center">
+      <a href="https://github.com/Yusuf-cm"><img src="https://github.com/Yusuf-cm.png?size=100" width="80" alt="Yusuf-cm"><br><b>Yusuf</b></a><br>
+      <sub>Payments, integration tests</sub>
+    </td>
+    <td align="center">
+      <a href="https://github.com/josephwakaro"><img src="https://github.com/josephwakaro.png?size=100" width="80" alt="josephwakaro"><br><b>Joseph Wakaro</b></a><br>
+      <sub>Data layer, analytics</sub>
+    </td>
+  </tr>
+</table>
+
+Areas of ownership are in [TEAM.md](TEAM.md). Open work is tracked in [issues](https://github.com/brn-mwai/oryn-ai-mashinani/issues).
 
 ---
 
