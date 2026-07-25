@@ -35,6 +35,38 @@
   <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="MIT License">
 </p>
 
+
+## Team
+
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/brn-mwai"><img src="https://github.com/brn-mwai.png?size=100" width="80" alt="brn-mwai"><br><b>Brian Mwai</b></a><br>
+      <sub>Architecture, agent runtime</sub>
+    </td>
+    <td align="center">
+      <a href="https://github.com/Mathew-Rym"><img src="https://github.com/Mathew-Rym.png?size=100" width="80" alt="Mathew-Rym"><br><b>Mathew Rym</b></a><br>
+      <sub>Frontend, demo experience</sub>
+    </td>
+    <td align="center">
+      <a href="https://github.com/Abdikhafar-hub"><img src="https://github.com/Abdikhafar-hub.png?size=100" width="80" alt="Abdikhafar-hub"><br><b>Abdikhafar</b></a><br>
+      <sub>Agent reasoning, security</sub>
+    </td>
+    <td align="center">
+      <a href="https://github.com/Yusuf-cm"><img src="https://github.com/Yusuf-cm.png?size=100" width="80" alt="Yusuf-cm"><br><b>Yusuf</b></a><br>
+      <sub>Payments, integration tests</sub>
+    </td>
+    <td align="center">
+      <a href="https://github.com/josephwakaro"><img src="https://github.com/josephwakaro.png?size=100" width="80" alt="josephwakaro"><br><b>Joseph Wakaro</b></a><br>
+      <sub>Data layer, analytics</sub>
+    </td>
+  </tr>
+</table>
+
+Areas of ownership are in [TEAM.md](TEAM.md). Open work is tracked in [issues](https://github.com/brn-mwai/oryn-ai-mashinani/issues).
+
+Built by **Hausor Labs**. Contact: [@brn-mwai](https://github.com/brn-mwai) - [Twitter](https://twitter.com/brn_mwai) - [LinkedIn](https://linkedin.com/in/brn-mwai)
+
 ---
 
 ## Watch the Demo
@@ -79,7 +111,7 @@ Upload Contract --> AI Parses Details --> Invoice Generated --> Email Sent
 | Step | What Happens | Technology Used |
 |------|--------------|-----------------|
 | 1. Upload | Drop any contract, invoice, or agreement | AI Document Parsing |
-| 2. Extract | AI extracts client name, email, amount, due date | Gemini / GPT-4o |
+| 2. Extract | AI extracts client name, email, amount, due date | Claude |
 | 3. Activate | One click to start autonomous collection | Marathon Agent |
 | 4. Collect | Agent sends reminders via email, SMS, WhatsApp | Multi-channel AI |
 | 5. Get Paid | Client pays USDC on Arc blockchain | Circle Arc + USDC |
@@ -430,50 +462,6 @@ pnpm dev
 
 ---
 
-## Team
-
-**Brian Mwai** - Founder & Developer
-
-| Platform | Link |
-|----------|------|
-| GitHub | [@brn-mwai](https://github.com/brn-mwai) |
-| Twitter | [@brn_mwai](https://twitter.com/brn_mwai) |
-| LinkedIn | [Brian Mwai](https://linkedin.com/in/brn-mwai) |
-
-Built by **Hausor Labs**
-
----
-
-## Team
-
-<table>
-  <tr>
-    <td align="center">
-      <a href="https://github.com/brn-mwai"><img src="https://github.com/brn-mwai.png?size=100" width="80" alt="brn-mwai"><br><b>Brian Mwai</b></a><br>
-      <sub>Architecture, agent runtime</sub>
-    </td>
-    <td align="center">
-      <a href="https://github.com/Mathew-Rym"><img src="https://github.com/Mathew-Rym.png?size=100" width="80" alt="Mathew-Rym"><br><b>Mathew Rym</b></a><br>
-      <sub>Frontend, demo experience</sub>
-    </td>
-    <td align="center">
-      <a href="https://github.com/Abdikhafar-hub"><img src="https://github.com/Abdikhafar-hub.png?size=100" width="80" alt="Abdikhafar-hub"><br><b>Abdikhafar</b></a><br>
-      <sub>Agent reasoning, security</sub>
-    </td>
-    <td align="center">
-      <a href="https://github.com/Yusuf-cm"><img src="https://github.com/Yusuf-cm.png?size=100" width="80" alt="Yusuf-cm"><br><b>Yusuf</b></a><br>
-      <sub>Payments, integration tests</sub>
-    </td>
-    <td align="center">
-      <a href="https://github.com/josephwakaro"><img src="https://github.com/josephwakaro.png?size=100" width="80" alt="josephwakaro"><br><b>Joseph Wakaro</b></a><br>
-      <sub>Data layer, analytics</sub>
-    </td>
-  </tr>
-</table>
-
-Areas of ownership are in [TEAM.md](TEAM.md). Open work is tracked in [issues](https://github.com/brn-mwai/oryn-ai-mashinani/issues).
-
----
 
 ## License
 
